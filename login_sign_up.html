@@ -39,42 +39,41 @@
             z-index: 1;
         }
 
-        .logo {
-            position: fixed;
-            top: 380px;
-            right: 200px;
-            text-align: center;
-            width: 100%;
-            color: white;
-            font-size: 70px;
-            font-weight: bold;
+        .content {
+            width: 100vw;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+            position: relative;
             z-index: 2;
+            padding: 20px;
         }
 
+        .logo,
         .Welcome-logo {
-            position: fixed;
-            top: 380px;
-            right: 200px;
             text-align: center;
-            width: 100%;
             color: white;
-            font-size: 60px;
-            font-weight: 1px;
-            z-index: 2;
+            margin-bottom: 20px;
+
         }
 
         .logo span {
             color: #FF6347;
+            font-size: 80px;
         }
 
+        .Welcome-logo{
+            font-size: 30px;
+        }
         .container {
-            margin-left: 50%;
-            position: relative;
             background-color: rgba(255, 255, 255, 0.9);
-            padding: 30px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 350px;
+            width: 90%;
+            max-width: 400px;
+            margin: 10px 0;
             z-index: 2;
         }
 
@@ -127,12 +126,23 @@
         }
 
         @media (max-width: 768px) {
-            .container {
-                width: 80%;
+
+            .content{
+                flex-direction: column;
             }
 
-            .logo {
-                font-size: 40px;
+            .logo span{
+                font-size: 60px;
+            }
+
+            .Welcome-logo {
+                font-size: 25px;
+            }
+
+            .container {
+                flex-direction: column;
+                width: 90%;
+                padding: 15px;
             }
         }
     </style>
@@ -141,55 +151,55 @@
 <body>
 
     <div class="overlay"></div>
+    <div class="content">
+        <div class="align-welcome">
+            <div class="logo">
+                <span>RestroSync</span>
+            </div>
+            <div class="Welcome-logo">
+                <h4>Management System</h4>
+            </div>
+        </div>
+        <div class="container" id="login-container">
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="login-email">Email:</label>
+                    <input type="email" id="login-email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+            <div class="message"></div>
+            <div class="toggle" id="go-to-signup">Don't have an account? Sign up</div>
+        </div>
 
-    <div class="align-welcome">
-    <div class="logo">
-        <span>RestroSync</span>
-    </div>
-    <div class="Welcome-logo">
-        <br>
-        <h4>Management System</h4>
-    </div>
-</div>
-    <div class="container" id="login-container">
-        <h2>Login</h2>
-        <form id="login-form">
-            <div class="input-group">
-                <label for="login-email">Email:</label>
-                <input type="email" id="login-email" name="email" placeholder="Enter your email" required>
-            </div>
-            <div class="input-group">
-                <label for="login-password">Password:</label>
-                <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" class="btn">Sign In</button>
-        </form>
-        <div class="message"></div>
-        <div class="toggle" id="go-to-signup">Don't have an account? Sign up</div>
-    </div>
-
-    <div class="container" id="signup-container" style="display: none;">
-        <h2>Sign Up</h2>
-        <form id="signup-form">
-            <div class="input-group">
-                <label for="signup-username">Username:</label>
-                <input type="text" id="signup-username" name="username" placeholder="Enter your username" required>
-            </div>
-            <div class="input-group">
-                <label for="signup-email">Email:</label>
-                <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
-            </div>
-            <div class="input-group">
-                <label for="signup-password">Password:</label>
-                <input type="password" id="signup-password" name="password" placeholder="Enter your password" required>
-            </div>
-            <div class="input-group">
-                <label for="confirm-password">Confirm Password:</label>
-                <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm your password" required>
-            </div>
-            <button type="submit" class="btn">Sign Up</button>
-        </form>
-        <div class="toggle" id="go-to-login">Already have an account? Log in</div>
+        <div class="container" id="signup-container" style="display: none;">
+            <h2>Sign Up</h2>
+            <form id="signup-form">
+                <div class="input-group">
+                    <label for="signup-username">Username:</label>
+                    <input type="text" id="signup-username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-email">Email:</label>
+                    <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-password">Password:</label>
+                    <input type="password" id="signup-password" name="password" placeholder="Enter your password" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password">Confirm Password:</label>
+                    <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+            <div class="toggle" id="go-to-login">Already have an account? Log in</div>
+        </div>
     </div>
 
     <script type="module">
