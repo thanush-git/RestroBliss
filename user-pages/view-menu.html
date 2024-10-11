@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <script type="module">
+        // Firebase initialization code
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        // Firebase configuration (use your own config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ki0BzQn7YGkdr75Nk1PEc3G-qraWfF0",
+            authDomain: "restrosync.firebaseapp.com",
+            projectId: "restrosync",
+            storageBucket: "restrosync.appspot.com",
+            messagingSenderId: "1055612629411",
+            appId: "1:1055612629411:web:1ec1b24087827f4c92aa16"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fetch and display menu items
+        document.addEventListener("DOMContentLoaded", async function() {
+            const categories = {
+                starter: [],
+                "main-course": [],
+                dessert: [],
+                beverage: []
+            };
+
+            try {
+                // Get all documents in 'menuItems' collection
+                const querySnapshot = await getDocs(collection(db, 'menuItems'));
+
+                // Loop through documents and categorize each item
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    categories[data.category]?.push(data);
+                });
+
+                // Display menu items under their respective categories
+                const menuItemsContainer = document.getElementById('menu-items');
+                for (const [category, items] of Object.entries(categories)) {
+                    if (items.length > 0) {
+                        const categoryHTML = `
+                            <h2>${capitalizeFirstLetter(category.replace('-', ' '))}</h2>
+                            <div class="menu-items">
+                                ${items.map(item => `
+                                    <div class="menu-item">
+                                        <span class="dish-name">${item.dishName}</span>
+                                        <span class="dish-price">₹${item.price}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                        menuItemsContainer.innerHTML += categoryHTML; // Add each category with its items
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching menu items: ", e);
+            }
+        });
+
+        // Capitalize the first letter of each word
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+    </script>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: #ff6347;
+        }
+
+        /* Menu list layout */
+        #menu-items {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Each menu item */
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Dish name styling */
+        .dish-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Dish price styling */
+        .dish-price {
+            font-size: 1.2rem;
+            color: #ff6347; /* Tomato color */
+            font-weight: bold;
+        }
+
+        /* Remove border from last item */
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Restaurant Menu</h1>
+    <div id="menu-items">
+        <!-- Menu items will be displayed here -->
+    </div>
+</body>
+</html>
