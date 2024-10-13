@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&display=swap');
+
+body{
+    margin: 0;
+    background-color: #f5f5dc; ;
+}
+
+.nav-bar{
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #e0c28f;
+    border-bottom: solid 2px #5f4b32;
+}
+
+.logo-img{
+    height: 50px;
+}
+
+.nav-bar-left{
+    padding-right: 20px;
+}
+
+.nav-bar-left a{
+    text-decoration: none;
+    color: #5f4b32;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 20px;
+    padding-left: 30px;
+}
+
+.hero-content{
+    padding-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.hero-banner{
+    width: 50vw;
+    border-radius: 12px;
+}
+  
+.hero-heading, .menu-text .heading ,.login-content .heading{
+    padding-top: 25px;
+    font-family: "Baskervville", serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 2em;
+}
+
+.hero-text, .login-text{
+    padding : 20px;
+    max-width: 60vw;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 20px;
+    text-align: center;
+    padding-bottom: 50px;
+}
+
+.menu-class{
+    background-color: #e0c28f;
+    display: flex;
+    padding: 30px;
+    justify-content: center;
+    gap: 50px;
+    border-bottom: solid 2px #5f4b32;
+    border-top: solid 2px #5f4b32;
+
+
+}
+
+.menu-img{
+    height: 250px;
+    border-radius: 12px;
+}
+
+.menu-text{
+    width: 800px;
+}
+
+
+.menu-text .body{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 20px;
+    padding-top: 30px;
+    text-align: justify;
+}
+
+.login-content{
+    width: 99vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-text{
+    padding-bottom: 10px;
+}
+
+/* Button Styles */
+.btn {
+    background-color: #b08d57; /* Softer button color */
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+.btn:hover {
+    background-color: #5f4b32;
+}
+
+.login-content .heading{
+    padding-top: 50px;
+}
+.footer{
+    margin-top: 50px;
+    border-top: solid 2px #5f4b32;
+    background-color: #e0c28f;
+    padding: 20px;
+}

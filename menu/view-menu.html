@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Menu</title>
+    <link rel="stylesheet" href="menu-view.css">
     <script type="module">
         // Firebase initialization code
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -70,63 +71,8 @@
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
     </script>
-    <style>
-        /* Basic styling */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 20px;
-            background-color: #f8f8f8;
-            color: #333;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        h2 {
-            margin-top: 20px;
-            color: #ff6347;
-        }
-
-        /* Menu list layout */
-        #menu-items {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Each menu item */
-        .menu-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #ddd;
-        }
-
-        /* Dish name styling */
-        .dish-name {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        /* Dish price styling */
-        .dish-price {
-            font-size: 1.2rem;
-            color: #ff6347; /* Tomato color */
-            font-weight: bold;
-        }
-
-        /* Remove border from last item */
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-    </style>
 </head>
+
 <body>
     <h1>Restaurant Menu</h1>
     <div id="menu-items">

@@ -1,0 +1,109 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f5f5dc; /* Light beige background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+}
+
+/* Container Styles */
+form {
+    background-color: #fff8e1;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    max-width: 600px;
+    width: 100%;
+    padding: 30px;
+    text-align: center;
+    border: 2px solid #e0c28f;
+}
+
+/* Heading Style */
+h1 {
+    font-size: 26px;
+    margin-bottom: 20px;
+    color: #5f4b32;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0c28f;
+    color: #5f4b32;
+}
+
+thead th {
+    background-color: #b08d57;
+    color: #fff;
+}
+
+/* Input and Select Styles */
+input, select {
+    padding: 10px;
+    border: 1px solid #e0c28f;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    background-color: #fff8e1;
+    outline: none;
+    transition: border-color 0.3s;
+    color: #333;
+}
+
+input:focus {
+    border-color: #b08d57;
+}
+
+input::placeholder {
+    color: #aaa;
+}
+
+/* Button Styles */
+button {
+    background-color: #b08d57;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #5f4b32;
+}
+
+/* Table Row Addition Styling */
+#new-button {
+    margin-top: 20px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
