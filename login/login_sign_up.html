@@ -143,9 +143,9 @@
                 if (userRoleDoc.exists()) {
                     const userData = userRoleDoc.data();
                     if (userData.role === "admin") {
-                        window.location.href = "admin.html"; // Redirect to admin page
+                        window.location.href = "../admin/admin.html"; // Redirect to admin page
                     } else {
-                        window.location.href = "diner.html"; // Redirect to diner page
+                        window.location.href = "../user/user-dashboard.html"; // Redirect to diner page
                     }
                 } else {
                     alert("User role not found in Firestore!");

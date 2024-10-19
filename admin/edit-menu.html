@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Editor</title>
+    <style>
+        /* CSS Styles (unchanged) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5dc; /* Light beige background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        form {
+            background-color: #fff8e1;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #e0c28f;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #5f4b32;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0c28f;
+            color: #5f4b32;
+        }
+
+        thead th {
+            background-color: #b08d57;
+            color: #fff;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #e0c28f;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+            background-color: #fff8e1;
+            outline: none;
+            transition: border-color 0.3s;
+            color: #333;
+        }
+
+        input:focus {
+            border-color: #b08d57;
+        }
+
+        button {
+            background-color: #b08d57;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #5f4b32;
+        }
+
+        #search-bar {
+            margin-bottom: 15px;
+        }
+
+        tbody tr:hover {
+            background-color: #e0d5c1; /* Light yellow on hover */
+        }
+
+        .modal {
+            display: none;
+            position: fixed; /* Fixed position for overlay */
+            z-index: 1;
+            left: 50%;
+            top: 65px; /* Centered vertically */
+            transform: translate(-50%, -50%); /* Centered */
+            width: 80%;
+            max-width: 400px;
+            background-color: rgba(255, 248, 225, 1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 2px solid #b08d57; /* Added border for consistency */
+            color: #5f4b32;
+        }
+
+        .modal-content {
+            text-align: center;
+        }
+
+        .close {
+            color: #5f4b32;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover, .close:focus {
+            color: #a27944;
+        }
+
+        /* Loading Spinner */
+        #loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+            color: #5f4b32; /* Consistent color */
+        }
+
+        @media (max-width: 768px) {
+            table, th, td {
+                display: block;
+                width: 100%;
+            }
+
+            table {
+                margin-bottom: 20px;
+            }
+
+            th, td {
+                padding: 10px;
+                text-align: left;
+            }
+
+            input, select {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Menu Editor</h1>
+        <input type="text" id="search-bar" placeholder="Search dishes..." oninput="filterMenuItems()">
+        <form action="">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dish Name</th>
+                        <th>Quantities</th>
+                        <th>Price per Quantity</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-table-body">
+                    <!-- Rows will be dynamically added here -->
+                </tbody>
+            </table>
+            <button type="button" id="new-button">Add Row +</button>
+            <button type="button" id="save-button">Save Menu</button>
+        </form>
+    </div>
+
+    <div id="custom-alert" class="modal">
+        <div class="modal-content">
+            <span class="close" aria-label="Close">&times;</span>
+            <p id="modal-message"></p>
+        </div>
+    </div>
+
+    <div id="delete-confirmation" class="modal">
+        <div class="modal-content">
+            <span class="close" aria-label="Close">&times;</span>
+            <p>Are you sure you want to delete this item?</p>
+            <button id="confirm-delete">Yes, delete</button>
+            <button id="cancel-delete">No, cancel</button>
+        </div>
+    </div>
+
+    <div id="loading-spinner">Loading...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ki0BzQn7YGkdr75Nk1PEc3G-qraWfF0",
+            authDomain: "restrosync.firebaseapp.com",
+            projectId: "restrosync",
+            storageBucket: "restrosync.appspot.com",
+            messagingSenderId: "1055612629411",
+            appId: "1:1055612629411:web:1ec1b24087827f4c92aa16"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let rowCount = 0;
+        let currentRowToDelete;
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            await loadMenuItems();
+
+            document.getElementById('new-button').addEventListener("click", function () {
+                addNewRow();
+            });
+
+            document.getElementById('save-button').addEventListener("click", saveData);
+        });
+
+        async function loadMenuItems() {
+            document.getElementById("loading-spinner").style.display = "block"; // Show loading spinner
+            const querySnapshot = await getDocs(collection(db, 'menuItems'));
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                addRowToTable(data.dishName, data.quantities, data.price, data.category, doc.id);
+            });
+            document.getElementById("loading-spinner").style.display = "none"; // Hide loading spinner
+        }
+
+        function addRowToTable(dishName = '', quantities = '', price = '', category = '', docId = '') {
+            const tableBody = document.getElementById('menu-table-body');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" id="dish-name-${rowCount}" value="${dishName}" placeholder="Enter a dish name..." required></td>
+                <td><input type="number" id="quantities-${rowCount}" value="${quantities}" min="1" placeholder="Enter Quantities..." required></td>
+                <td><input type="number" id="price-${rowCount}" value="${price}" min="1" placeholder="Enter Price in ₹" required></td>
+                <td>
+                    <select id="category-${rowCount}" required>
+                        <option value="">Select a category</option>
+                        <option value="starter" ${category === 'starter' ? 'selected' : ''}>Starter</option>
+                        <option value="main" ${category === 'main' ? 'selected' : ''}>Main Course</option>
+                        <option value="dessert" ${category === 'dessert' ? 'selected' : ''}>Dessert</option>
+                         <option value="beverage" ${category === 'beverage' ? 'selected' : ''}>Beverage</option>
+
+                    </select>
+                </td>
+                <td>
+                    <button type="button" class="delete-button" data-doc-id="${docId}" aria-label="Delete ${dishName}">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+            rowCount++;
+
+            newRow.querySelector('.delete-button').addEventListener("click", function () {
+                currentRowToDelete = newRow; // Store the row to delete
+                document.getElementById('delete-confirmation').style.display = 'block';
+
+                // Set docId for the confirmation buttons
+                document.getElementById('confirm-delete').setAttribute('data-doc-id', docId);
+            });
+        }
+
+        async function saveData() {
+            const menuItems = [];
+            for (let i = 0; i < rowCount; i++) {
+                const dishName = document.getElementById(`dish-name-${i}`).value.trim();
+                const quantities = document.getElementById(`quantities-${i}`).value.trim();
+                const price = document.getElementById(`price-${i}`).value.trim();
+                const category = document.getElementById(`category-${i}`).value;
+
+                if (dishName === '' || quantities === '' || price === '' || category === '') {
+                    showModal("All fields are required!");
+                    return; // Stop saving if validation fails
+                }
+
+                menuItems.push({
+                    dishName,
+                    quantities: parseInt(quantities),
+                    price: parseFloat(price),
+                    category
+                });
+            }
+
+            // Save or update menuItems in Firestore
+            for (const item of menuItems) {
+                await addDoc(collection(db, 'menuItems'), item);
+            }
+
+            showModal("Menu saved successfully!");
+        }
+
+        function addNewRow() {
+            addRowToTable();
+        }
+
+        function filterMenuItems() {
+            const searchValue = document.getElementById('search-bar').value.toLowerCase();
+            const rows = document.querySelectorAll('#menu-table-body tr');
+            rows.forEach(row => {
+                const dishName = row.querySelector('input[type="text"]').value.toLowerCase();
+                row.style.display = dishName.includes(searchValue) ? '' : 'none';
+            });
+        }
+
+        document.getElementById('confirm-delete').onclick = async function() {
+            const docId = this.getAttribute('data-doc-id');
+            if (docId) {
+                await deleteDoc(doc(db, 'menuItems', docId));
+                if (currentRowToDelete) {
+                    document.getElementById('menu-table-body').removeChild(currentRowToDelete);
+                }
+                showModal("Item deleted successfully!");
+            }
+            document.getElementById('delete-confirmation').style.display = 'none';
+        };
+
+        document.getElementById('cancel-delete').onclick = function() {
+            document.getElementById('delete-confirmation').style.display = 'none';
+        };
+
+        function showModal(message) {
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('custom-alert').style.display = 'block';
+            setTimeout(() => {
+        document.getElementById('custom-alert').style.display = 'none';
+    }, 2000); // 2000 milliseconds = 2 seconds
+        }
+
+        const closeButtons = document.querySelectorAll('.close');
+        closeButtons.forEach(button => {
+            button.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            };
+        });
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5dc;
+        }
+
+        .invoice-container {
+            margin: 50px auto;
+            max-width: 800px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .company-details {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .invoice-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .invoice-total {
+            text-align: right;
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+
+        .confirmation-message {
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px dashed #8b6b61;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-home,
+        .btn-download {
+            margin-top: 20px;
+            background-color: #8b6b61;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-home:hover,
+        .btn-download:hover {
+            background-color: #6d597a;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container invoice-container">
+        <h1 class="invoice-header">Invoice</h1>
+        <div class="company-details">
+            <img src="../home/nav-bar.png" alt="">
+            <p>123 Food Street</p>
+            <p>Kobe, Japan</p>
+            <p>Email: restrobliss@restaurant.com</p>
+            <p>Phone: +91 9901466427</p>
+        </div>
+
+        <div id="invoice-items"></div>
+        <p class="invoice-total">Total: ₹<span id="invoice-total">0</span></p>
+
+        <div class="confirmation-message">
+            Your order has been confirmed! Thank you for ordering with us.
+        </div>
+
+        <button class="btn-download" onclick="downloadPDF()">Download Invoice</button>
+        <button class="btn-home" onclick="location.href='user-dashboard.html'">Home</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script>
+        function loadInvoice() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let invoiceItemsContainer = document.getElementById('invoice-items');
+            let invoiceTotal = 0;
+            invoiceItemsContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                invoiceItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    invoiceTotal += itemTotal;
+
+                    invoiceItemsContainer.innerHTML += `
+                        <div class="invoice-item">
+                            <div>
+                                <strong>${item.itemName}</strong>
+                                <p>Price: ₹${item.price} x ${item.quantity}</p>
+                            </div>
+                            <p>₹${itemTotal}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('invoice-total').textContent = invoiceTotal;
+        }
+
+        window.onload = loadInvoice;
+        function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Invoice", 105, 50, null, null, "center");
+
+    // Company details
+    doc.setFontSize(16); // Bigger font size for the restaurant name
+    doc.setFont("helvetica", "bold");
+    doc.text("RestroBliss", 105, 60, null, null, "center"); // Centered, bold, and bigger
+    doc.setFontSize(12); // Reset font size for the rest of the details
+    doc.setFont("helvetica", "normal");
+
+    const companyDetails = [
+        "123 Food Street",
+        "Kobe, Japan",
+        "Email: restrobliss@restaurant.com",
+        "Phone: +81 3-1234-5678"
+    ];
+
+    companyDetails.forEach((line, index) => {
+        doc.text(line, 105, 65 + index * 5, null, null, "center"); // Adjust Y position for subsequent lines
+    });
+
+    // Draw a horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(10, 85, 200, 85); // Line across the page
+
+    // Item list
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Items:", 10, 95);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+
+    let yPosition = 105; // Adjusted starting position
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let invoiceTotal = 0;
+
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        invoiceTotal += itemTotal;
+
+        // Create the item string and calculate its width
+        const itemString = `${item.itemName}: ₹${item.price} x ${item.quantity}`;
+        const rightMargin = 10; // Margin from the right edge of the page
+        const xPosition = 200 - rightMargin; // Total width of the PDF (210) minus right margin
+
+        // Align the item text and price
+        doc.text(itemString, 10, yPosition);
+        doc.text(`₹${itemTotal}`, xPosition, yPosition, { align: "right" });
+
+        yPosition += 10;
+    });
+
+    // Total
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+
+    // Calculate the x position for right alignment
+    const rightMargin = 10; // Adjust this value for desired margin from the right edge
+    const xPositionTotal = 200 - rightMargin; // Total width of the PDF (210) minus right margin
+
+    // Align the total text to the right
+    doc.text(`Total: ₹${invoiceTotal}`, xPositionTotal, yPosition, { align: "right" });
+    yPosition += 20;
+
+    // Draw another horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(10, yPosition - 5, 200, yPosition - 5); // Line above the confirmation message
+
+    // Confirmation message
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Your order has been confirmed! Thank you for ordering with us.", 10, yPosition);
+
+    // Save PDF
+    doc.save("invoice.pdf");
+}
+
+
+    </script>
+</body>
+
+</html>
