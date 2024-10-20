@@ -127,3 +127,85 @@ body{
     background-color: #e0c28f;
     padding: 20px;
 }
+
+
+/* Media Queries for Small Screens */
+@media (max-width: 768px) {
+
+    .hero-content{
+        width: 100vw;
+    }
+  
+    .nav-bar-left a {
+        font-size: 16px;
+        padding-left: 10px;
+    }
+
+    .hero-banner {
+        width: 90%;
+        
+    }
+
+    .hero-heading {
+        font-size: 2em;
+        text-align: center;
+    }
+
+    .hero-text{
+        text-align: justify;
+    }
+
+    .menu-img{
+        width: 100%;
+        height: auto;
+    }
+    .menu-class {
+        margin: 0;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .menu-text{
+        width: 90vw;
+        text-wrap: wrap;
+        font-size: 1em;
+    }
+
+    .menu-text .heading{
+        text-align: center;
+    }
+
+    .btn {
+        width: 90%; /* Full-width buttons on smaller screens */
+    }
+
+    .login-content{
+        width: 100vw;
+        align-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-bar {
+        flex-direction: column; /* Stack nav bar items vertically */
+        align-items: flex-start;
+    }
+
+    .nav-bar-left {
+        padding-left: 10px;
+    }
+
+        
+    .nav-bar-left a {
+        font-size: 20px;
+        padding: 10px 0;
+        padding-right: 10px;
+    }
+
+    .menu-text .body{
+        width: 90%;
+    }
+    .hero-heading, .menu-text .heading, .login-content .heading {
+        font-size: 2em;
+    }
+}
