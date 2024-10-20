@@ -206,6 +206,6 @@ body{
         width: 90%;
     }
     .hero-heading, .menu-text .heading, .login-content .heading {
-        font-size: 2em;
+        font-size: 1.5em;
     }
 }

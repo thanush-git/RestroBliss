@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +10,62 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body { background-color: #f5f5dc; }
-        .header { background-color: #e0c28f; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4b3832; }
-        .header-logo img { height: 50px; }
-        .header-icons a { margin-left: 20px; color: #fff; text-decoration: none; font-size: 1.5rem; }
-        .dashboard { display: flex; margin-top: 20px; }
-        .sidebar { width: 250px; background-color: #e0c28f; padding: 20px; height: 100vh; border: 2px solid #4b3832; border-radius: 12px; }
-        .menu { margin-left: 20px; flex-grow: 1; padding: 20px; background-color: #fff; height: 80vh; overflow-y: auto; border-radius: 12px; }
-        .filter-button { background-color: #e0c28f; border: 0px; color: #4b3832; font-size: 25px; font-weight: 400; text-align: left; }
+        body {
+            background-color: #f5f5dc;
+        }
+
+        .header {
+            background-color: #e0c28f;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #4b3832;
+        }
+
+        .header-logo img {
+            height: 50px;
+        }
+
+        .header-icons a {
+            margin-left: 20px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+
+        .dashboard {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #e0c28f;
+            padding: 20px;
+            height: 100vh;
+            border: 2px solid #4b3832;
+            border-radius: 12px;
+        }
+
+        .menu {
+            margin-left: 20px;
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #fff;
+            height: 80vh;
+            overflow-y: auto;
+            border-radius: 12px;
+        }
+
+        .filter-button {
+            background-color: #e0c28f;
+            border: 0px;
+            color: #4b3832;
+            font-size: 25px;
+            font-weight: 400;
+            text-align: left;
+        }
 
         .menu-item {
             position: relative;
@@ -65,11 +114,46 @@
             color: #4b3832;
         }
 
-        .bi{
+        .bi {
             color: #4b3832;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 30vw;
+            }
+
+            .filter-button {
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .extra-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 30vw;
+            }
+
+            .filter-button {
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .extra-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
@@ -167,7 +251,7 @@
         }
 
         // Attach addToCart function to the window object for global access
-        window.addToCart = function(itemName, price, button) {
+        window.addToCart = function (itemName, price, button) {
             const quantity = parseInt(button.previousElementSibling.value);
             console.log(`Adding ${itemName}, Quantity: ${quantity}, Price: ₹${price}`);
 
@@ -241,40 +325,41 @@
         //Search Function
 
         document.addEventListener("DOMContentLoaded", () => {
-    loadMenuItems();
+            loadMenuItems();
 
-    // Set up the search functionality
-    const searchInput = document.getElementById('search');
-    searchInput.addEventListener('keyup', () => {
-        const query = searchInput.value.toLowerCase();
-        filterMenuItemsBySearch(query);
-    });
-});
+            // Set up the search functionality
+            const searchInput = document.getElementById('search');
+            searchInput.addEventListener('keyup', () => {
+                const query = searchInput.value.toLowerCase();
+                filterMenuItemsBySearch(query);
+            });
+        });
 
-function filterMenuItemsBySearch(query) {
-    const allItems = document.querySelectorAll('.menu-item');
+        function filterMenuItemsBySearch(query) {
+            const allItems = document.querySelectorAll('.menu-item');
 
-    allItems.forEach(item => {
-        const dishName = item.querySelector('.dish-name').textContent.toLowerCase();
-        if (dishName.includes(query)) {
-            item.parentElement.parentElement.classList.remove('hidden'); // Show the category if any item matches
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none'; // Hide the individual item if it doesn't match
+            allItems.forEach(item => {
+                const dishName = item.querySelector('.dish-name').textContent.toLowerCase();
+                if (dishName.includes(query)) {
+                    item.parentElement.parentElement.classList.remove('hidden'); // Show the category if any item matches
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none'; // Hide the individual item if it doesn't match
+                }
+            });
+
+            // If a category has no visible items, hide the entire category
+            document.querySelectorAll('.category').forEach(category => {
+                const visibleItems = category.querySelectorAll('.menu-item[style*="flex"]');
+                if (visibleItems.length === 0) {
+                    category.classList.add('hidden');
+                } else {
+                    category.classList.remove('hidden');
+                }
+            });
         }
-    });
-
-    // If a category has no visible items, hide the entire category
-    document.querySelectorAll('.category').forEach(category => {
-        const visibleItems = category.querySelectorAll('.menu-item[style*="flex"]');
-        if (visibleItems.length === 0) {
-            category.classList.add('hidden');
-        } else {
-            category.classList.remove('hidden');
-        }
-    });
-}
 
     </script>
 </body>
+
 </html>
