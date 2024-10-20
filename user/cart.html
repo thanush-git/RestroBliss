@@ -45,6 +45,22 @@
         .btn-checkout:hover {
             background-color: #6d597a;
         }
+        .btn-remove {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #4b3832;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .btn-remove:hover {
+            color: #ff4c4c;
+        }
+        .price-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -54,7 +70,6 @@
         <p class="cart-total">Total: ₹<span id="cart-total">0</span></p>
         <button class="btn-checkout" onclick="checkout()">Proceed to Checkout</button>
         <button class="btn-clear-cart" onclick="clearCart()">Clear Cart</button>
-
     </div>
 
     <script>
@@ -78,7 +93,10 @@
                                 <h5>${item.itemName}</h5>
                                 <p>Price: ₹${item.price} x ${item.quantity}</p>
                             </div>
-                            <p>₹${itemTotal}</p>
+                            <div class="price-container">
+                                <p>₹${itemTotal}</p>
+                                <button class="btn-remove" onclick="removeFromCart('${item.itemName}')">&times;</button>
+                            </div>
                         </div>
                     `;
                 });
@@ -88,18 +106,26 @@
             document.getElementById('cart-total').textContent = cartTotal;
         }
 
-        // Function to simulate checkout process
-        function checkout() {
-            // Redirect to invoice page
-            window.location.href = 'invoice.html';
+        // Function to remove an item from the cart
+        function removeFromCart(itemName) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(item => item.itemName !== itemName); // Remove the selected item
+            localStorage.setItem('cart', JSON.stringify(cart));
+            loadCart(); // Reload the cart
         }
 
+        // Function to simulate the checkout process
+        function checkout() {
+            window.location.href = 'invoice.html'; // Redirect to invoice page
+        }
+
+        // Function to clear the entire cart
         function clearCart() {
             localStorage.clear();
             location.reload();
         }
 
-        // Load cart when the page loads
+        // Load the cart when the page loads
         window.onload = loadCart;
     </script>
 </body>

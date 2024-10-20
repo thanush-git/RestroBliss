@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Editor</title>
     <style>
-        /* CSS Styles (unchanged) */
+        /* CSS Styles */
         * {
             margin: 0;
             padding: 0;
@@ -103,7 +103,7 @@
             position: fixed; /* Fixed position for overlay */
             z-index: 1;
             left: 50%;
-            top: 65px; /* Centered vertically */
+            top: 50%; /* Centered vertically */
             transform: translate(-50%, -50%); /* Centered */
             width: 80%;
             max-width: 400px;
@@ -227,15 +227,12 @@
         const db = getFirestore(app);
 
         let rowCount = 0;
-        let currentRowToDelete;
+        let currentRowToDelete = null;
 
         document.addEventListener("DOMContentLoaded", async function() {
             await loadMenuItems();
 
-            document.getElementById('new-button').addEventListener("click", function () {
-                addNewRow();
-            });
-
+            document.getElementById('new-button').addEventListener("click", addNewRow);
             document.getElementById('save-button').addEventListener("click", saveData);
         });
 
@@ -252,8 +249,8 @@
         function addRowToTable(dishName = '', quantities = '', price = '', category = '', docId = '') {
             const tableBody = document.getElementById('menu-table-body');
             const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td><input type="text" id="dish-name-${rowCount}" value="${dishName}" placeholder="Enter a dish name..." required></td>
+            newRow.innerHTML = 
+                `<td><input type="text" id="dish-name-${rowCount}" value="${dishName}" placeholder="Enter a dish name..." required></td>
                 <td><input type="number" id="quantities-${rowCount}" value="${quantities}" min="1" placeholder="Enter Quantities..." required></td>
                 <td><input type="number" id="price-${rowCount}" value="${price}" min="1" placeholder="Enter Price in ₹" required></td>
                 <td>
@@ -262,14 +259,12 @@
                         <option value="starter" ${category === 'starter' ? 'selected' : ''}>Starter</option>
                         <option value="main" ${category === 'main' ? 'selected' : ''}>Main Course</option>
                         <option value="dessert" ${category === 'dessert' ? 'selected' : ''}>Dessert</option>
-                         <option value="beverage" ${category === 'beverage' ? 'selected' : ''}>Beverage</option>
-
+                        <option value="beverage" ${category === 'beverage' ? 'selected' : ''}>Beverage</option>
                     </select>
                 </td>
                 <td>
-                    <button type="button" class="delete-button" data-doc-id="${docId}" aria-label="Delete ${dishName}">Delete</button>
-                </td>
-            `;
+                    <button type="button" id="delete-button-${rowCount}" class="delete-button" data-doc-id="${docId}" aria-label="Delete ${dishName}">Delete</button>
+                </td>`;
             tableBody.appendChild(newRow);
             rowCount++;
 
@@ -282,84 +277,123 @@
             });
         }
 
+        function addNewRow() {
+            addRowToTable();
+        }
+
         async function saveData() {
             const menuItems = [];
+            const dishNames = new Set(); // Use a Set to track unique dish names
             for (let i = 0; i < rowCount; i++) {
                 const dishName = document.getElementById(`dish-name-${i}`).value.trim();
                 const quantities = document.getElementById(`quantities-${i}`).value.trim();
                 const price = document.getElementById(`price-${i}`).value.trim();
                 const category = document.getElementById(`category-${i}`).value;
+                const docId = document.getElementById(`delete-button-${i}`)?.getAttribute('data-doc-id');
 
+                // Input validation
                 if (dishName === '' || quantities === '' || price === '' || category === '') {
                     showModal("All fields are required!");
                     return; // Stop saving if validation fails
                 }
 
-                menuItems.push({
+                if (quantities <= 0 || price <= 0) {
+                    showModal("Quantities and Price must be positive numbers!");
+                    return; // Stop saving if validation fails
+                }
+
+                // Check for duplicates
+                if (dishNames.has(dishName.toLowerCase())) {
+                    showModal(`The dish "${dishName}" already exists! Please use a unique name.`);
+                    return; // Stop saving if a duplicate is found
+                }
+
+                // Add the dish name to the Set to track duplicates
+                dishNames.add(dishName.toLowerCase());
+
+                const item = {
                     dishName,
                     quantities: parseInt(quantities),
                     price: parseFloat(price),
                     category
-                });
-            }
+                };
 
-            // Save or update menuItems in Firestore
-            for (const item of menuItems) {
-                await addDoc(collection(db, 'menuItems'), item);
+                try {
+                    // Check if the item is already in Firestore and either update or add it
+                    if (docId) {
+                        // If docId exists, update the document
+                        await updateDoc(doc(db, 'menuItems', docId), item);
+                    } else {
+                        // Otherwise, add a new document
+                        const existingQuery = await getDocs(collection(db, 'menuItems'));
+                        const existingDishes = existingQuery.docs.map(doc => doc.data().dishName.toLowerCase());
+                        
+                        if (existingDishes.includes(dishName.toLowerCase())) {
+                            showModal(`The dish "${dishName}" already exists in the database!`);
+                            return; // Prevent adding duplicate
+                        }
+                        
+                        const docRef = await addDoc(collection(db, 'menuItems'), item);
+                        item.docId = docRef.id; // Store the newly created doc ID
+                    }
+                    menuItems.push(item);
+                } catch (error) {
+                    showModal("Error saving item: " + error.message);
+                }
             }
 
             showModal("Menu saved successfully!");
         }
 
-        function addNewRow() {
-            addRowToTable();
+        function showModal(message) {
+            const modal = document.getElementById('custom-alert');
+            const modalMessage = document.getElementById('modal-message');
+            modalMessage.innerText = message;
+            modal.style.display = 'block';
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            // Close modal when clicking the close button
+            document.querySelector('.close').onclick = function() {
+                modal.style.display = "none";
+            }
         }
 
+        // Search functionality
         function filterMenuItems() {
-            const searchValue = document.getElementById('search-bar').value.toLowerCase();
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase();
             const rows = document.querySelectorAll('#menu-table-body tr');
+
             rows.forEach(row => {
                 const dishName = row.querySelector('input[type="text"]').value.toLowerCase();
-                row.style.display = dishName.includes(searchValue) ? '' : 'none';
+                if (dishName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
         }
 
-        document.getElementById('confirm-delete').onclick = async function() {
+        // Delete confirmation
+        document.getElementById('confirm-delete').addEventListener('click', async function () {
             const docId = this.getAttribute('data-doc-id');
             if (docId) {
                 await deleteDoc(doc(db, 'menuItems', docId));
-                if (currentRowToDelete) {
-                    document.getElementById('menu-table-body').removeChild(currentRowToDelete);
-                }
+                currentRowToDelete.remove(); // Remove the row from the table
+                currentRowToDelete = null; // Reset the current row to delete
                 showModal("Item deleted successfully!");
             }
-            document.getElementById('delete-confirmation').style.display = 'none';
-        };
-
-        document.getElementById('cancel-delete').onclick = function() {
-            document.getElementById('delete-confirmation').style.display = 'none';
-        };
-
-        function showModal(message) {
-            document.getElementById('modal-message').innerText = message;
-            document.getElementById('custom-alert').style.display = 'block';
-            setTimeout(() => {
-        document.getElementById('custom-alert').style.display = 'none';
-    }, 2000); // 2000 milliseconds = 2 seconds
-        }
-
-        const closeButtons = document.querySelectorAll('.close');
-        closeButtons.forEach(button => {
-            button.onclick = function() {
-                this.closest('.modal').style.display = 'none';
-            };
+            document.getElementById('delete-confirmation').style.display = 'none'; // Close confirmation
         });
 
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        };
+        document.getElementById('cancel-delete').addEventListener('click', function () {
+            document.getElementById('delete-confirmation').style.display = 'none'; // Close confirmation
+        });
     </script>
 </body>
 </html>
