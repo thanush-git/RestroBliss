@@ -10,9 +10,10 @@ body {
     background-color: #f5f5dc; /* Light beige background */
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Align to the top */
     height: 100vh;
     padding: 20px;
+    overflow-x: hidden;
 }
 
 /* Container Styles */
@@ -25,12 +26,25 @@ body {
     padding: 30px;
     text-align: center;
     border: 2px solid #e0c28f; /* Soft border */
+    
 }
 
 h1 {
     font-size: 26px;
     margin-bottom: 20px;
     color: #5f4b32; /* Soft brown text for heading */
+}
+
+/* Filter Styles */
+#statusFilter {
+    margin-bottom: 20px; /* Space for filter */
+}
+
+/* Reservation List Styles */
+#reservation-list {
+    max-height: 400px; /* Limit height */
+    overflow-y: auto;  /* Enable scrolling */
+    margin-top: 20px;  /* Space from the filter above */
 }
 
 /* Form Styles */
@@ -127,6 +141,39 @@ input::placeholder {
     margin-bottom: 10px;
 }
 
-a{
+a {
     text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px; /* Less padding on smaller screens */
+    }
+    
+    .modal {
+        width: 90%; /* Make the modal wider on smaller screens */
+    }
+}
+#reservation-list {
+    margin-top: 20px;
+    max-height: 400px; /* Limit height */
+    overflow-y: auto;  /* Enable scrolling */
+}
+
+/* Scrollbar styles for WebKit browsers (Chrome, Safari) */
+#reservation-list::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+}
+
+#reservation-list::-webkit-scrollbar-track {
+    background: #f5f5dc; /* Background of the scrollbar track */
+}
+
+#reservation-list::-webkit-scrollbar-thumb {
+    background: #b08d57; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+#reservation-list::-webkit-scrollbar-thumb:hover {
+    background: #a07d4c; /* Color of the thumb on hover */
 }

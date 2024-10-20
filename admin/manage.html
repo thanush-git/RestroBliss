@@ -4,16 +4,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Reservations</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="reservation_style.css">
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 50%; /* Centering the modal vertically */
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
+            background-color: rgba(255, 248, 225, 1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 2px solid #b08d57;
+            color: #5f4b32;
+        }
+
+        .modal-content {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            text-align: center;
+        }
+
+        .modal-buttons button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #b08d57;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-buttons button:hover {
+            background-color: #a07d4c;
+        }
+
+        /* Reservation list styles */
+        #reservation-list {
+            margin-top: 20px;
+            max-height: 400px; /* Limit height */
+            overflow-y: auto;  /* Enable scrolling */
+        }
+
+        .reservation-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: rgba(255, 248, 225, 1);
+            color: #5f4b32;
+        }
+
+        .reservation-item button {
+            margin: 5px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #b08d57;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .reservation-item button:hover {
+            background-color: #a07d4c;
+        }
+
+        /* Pagination button styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #b08d57;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: #a07d4c;
+        }
+
+        /* Active page number style */
+        .pagination span {
+            margin: 0 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #5f4b32;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Manage Reservations</h1>
+
+        <!-- Filter -->
+        <label for="statusFilter">Filter by Status:</label>
+        <select id="statusFilter">
+            <option value="">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+
+        <!-- Reservation list -->
         <div id="reservation-list"></div>
+
+        <!-- Spinner -->
+        <div id="spinner" class="spinner" style="display: none;"></div>
+
+        
+
+        <!-- Custom Modal -->
+        <div id="customModal" class="modal">
+            <div class="modal-content" id="modalMessage">Message goes here</div>
+            <div class="modal-buttons">
+                <button id="closeModalButton">OK</button>
+            </div>
+        </div>
     </div>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
-    <script type="module" src="manage.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOa10HxG6-NtVRRdooS1e0B4wfDEVXOAc",
+            authDomain: "reservation-eea23.firebaseapp.com",
+            projectId: "reservation-eea23",
+            storageBucket: "reservation-eea23.appspot.com",
+            messagingSenderId: "715787830364",
+            appId: "1:715787830364:web:71795be9f0d8ebe2965299"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let reservations = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        // Function to fetch reservations
+        async function getReservations() {
+            try {
+                showSpinner(true);
+                const querySnapshot = await getDocs(collection(db, "reservations"));
+                if (querySnapshot.empty) {
+                    showModal("No reservations found.");
+                    return;
+                }
+                reservations = [];
+                querySnapshot.forEach((doc) => {
+                    reservations.push({ id: doc.id, ...doc.data() });
+                });
+                filterAndDisplayReservations();
+            } catch (error) {
+                console.error("Error fetching reservations:", error);
+                showModal("Error fetching reservations. Please try again.");
+            } finally {
+                showSpinner(false);
+            }
+        }
+
+        function showSpinner(isVisible) {
+            const spinner = document.getElementById('spinner');
+            spinner.style.display = isVisible ? 'block' : 'none';
+        }
+
+        // Filter and display reservations
+        function filterAndDisplayReservations() {
+            const statusFilter = document.getElementById("statusFilter").value;
+            const filteredReservations = reservations.filter(r => {
+                const reservationStatus = r.status || 'Pending';
+                return !statusFilter || reservationStatus === statusFilter;
+            });
+            displayReservations(filteredReservations);
+        }
+
+        // Function to display reservations
+        function displayReservations(reservations) {
+            const reservationList = document.getElementById("reservation-list");
+            reservationList.innerHTML = ""; // Clear the list
+
+            if (reservations.length === 0) {
+                reservationList.innerHTML = "<p>No reservations to display.</p>";
+                return;
+            }
+
+            reservations.forEach((reservation) => {
+                const reservationItem = document.createElement("div");
+                reservationItem.classList.add("reservation-item");
+
+                reservationItem.innerHTML = `
+                    <p><strong>Name:</strong> ${reservation.name}</p>
+                    <p><strong>Email:</strong> ${reservation.email || "Pending"}</p>
+                    <p><strong>Date:</strong> ${reservation.date || "Pending"}</p>
+                    <p><strong>Time:</strong> ${reservation.time || "Pending"}</p>
+                    <p><strong>Number Of People:</strong> ${reservation.numberOfPeople || "Pending"}</p>
+                    <p><strong>Status:</strong> ${reservation.status || "Pending"}</p>
+                    <button class="approve-btn" data-id="${reservation.id}">Approve</button>
+                    <button class="reject-btn" data-id="${reservation.id}">Reject</button>
+                    <button class="delete-btn" data-id="${reservation.id}">Delete</button>
+                `;
+                reservationList.appendChild(reservationItem);
+            });
+
+            // Add event listeners to buttons after creating the reservation elements
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.addEventListener('click', () => updateReservationStatus(btn.dataset.id, 'Approved'));
+            });
+            document.querySelectorAll('.reject-btn').forEach(btn => {
+                btn.addEventListener('click', () => updateReservationStatus(btn.dataset.id, 'Rejected'));
+            });
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteReservation(btn.dataset.id));
+            });
+        }
+
+        // Function to show custom modal with a message
+        function showModal(message) {
+            const modal = document.getElementById("customModal");
+            const modalMessage = document.getElementById("modalMessage");
+            modalMessage.textContent = message;
+            modal.style.display = "block";
+        }
+
+        // Event listener to close the modal
+        document.getElementById("closeModalButton").addEventListener("click", () => {
+            document.getElementById("customModal").style.display = "none";
+        });
+
+        // Function to update reservation status
+        async function updateReservationStatus(id, status) {
+            try {
+                const reservationRef = doc(db, "reservations", id);
+                await updateDoc(reservationRef, { status });
+                showModal(`Reservation ${status}`);
+                getReservations();
+            } catch (error) {
+                showModal("Error updating reservation. Please try again.");
+            }
+        }
+
+        // Function to delete a reservation
+        async function deleteReservation(id) {
+            try {
+                await deleteDoc(doc(db, "reservations", id));
+                showModal("Reservation deleted");
+                getReservations();
+            } catch (error) {
+                showModal("Error deleting reservation. Please try again.");
+            }
+        }
+
+        // Event listener for the filter dropdown
+        document.getElementById("statusFilter").addEventListener("change", filterAndDisplayReservations);
+
+        // Fetch reservations when the page loads
+        window.onload = getReservations;
+    </script>
 </body>
 </html>
