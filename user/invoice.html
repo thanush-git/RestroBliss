@@ -89,7 +89,7 @@
         </div>
 
         <button class="btn-download" onclick="downloadPDF()">Download Invoice</button>
-        <button class="btn-home" onclick="location.href='user-dashboard.html'">Home</button>
+        <button class="btn-home" onclick="localStorage.clear(),  location.href='user-dashboard.html'">Home</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
@@ -204,6 +204,8 @@
 
     // Save PDF
     doc.save("invoice.pdf");
+
+    localStorage.clear();
 }
 
 

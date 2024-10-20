@@ -34,7 +34,7 @@
             font-size: 1.5rem;
             margin-top: 30px;
         }
-        .btn-checkout {
+        .btn-checkout, .btn-clear-cart {
             background-color: #8b6b61;
             color: #fff;
             border: none;
@@ -53,6 +53,8 @@
         <div id="cart-items"></div>
         <p class="cart-total">Total: ₹<span id="cart-total">0</span></p>
         <button class="btn-checkout" onclick="checkout()">Proceed to Checkout</button>
+        <button class="btn-clear-cart" onclick="clearCart()">Clear Cart</button>
+
     </div>
 
     <script>
@@ -90,6 +92,11 @@
         function checkout() {
             // Redirect to invoice page
             window.location.href = 'invoice.html';
+        }
+
+        function clearCart() {
+            localStorage.clear();
+            location.reload();
         }
 
         // Load cart when the page loads
